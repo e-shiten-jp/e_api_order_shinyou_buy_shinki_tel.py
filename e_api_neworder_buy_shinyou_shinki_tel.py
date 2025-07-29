@@ -3,10 +3,10 @@
 
 # 2021.07.08,   yo.
 # 2022.10.25 reviced,   yo.
-# 2025.07.25 reviced,   yo.
-# 
+# 2025.07.27 reviced,   yo.
+#
 # 立花証券ｅ支店ＡＰＩ利用のサンプルコード
-# 
+#
 # 動作確認
 # Python 3.11.2 / debian12
 # API v4r7
@@ -20,8 +20,14 @@
 # 注文値段: my_sOrderPrice  （*:指定なし、0:成行、上記以外は、注文値段。小数点については、関連資料:「立花証券・e支店・API、REQUEST I/F、マスタデータ利用方法」の「2-12. 呼値」参照。）
 # 注文数量: my_sOrderSuryou
 #
+#
 # 利用方法: 
-# 事前に「e_api_login_tel.py」を実行して、仮想URL（1日券）等を取得しておいてください。
+# 事前に「e_api_login_tel.py」を実行して、仮想URL等を取得しておいてください。
+#
+#
+# 利用方法: 
+# 事前に「e_api_login_tel.py」を実行して、
+# 仮想URL（1日券）等を取得しておいてください。
 #
 #
 # == ご注意: ========================================
@@ -246,6 +252,29 @@ def func_read_from_file(str_fname):
         print(type(e))
 
 
+# 機能: class_req型データをjson形式の文字列に変換する。
+# 返値: json形式の文字
+# 第１引数： class_req型データ
+def func_make_json_format(work_class_req):
+    work_key = ''
+    work_value = ''
+    str_json_data =  '{\n\t'
+    for i in range(len(work_class_req)) :
+        work_key = func_strip_dquot(work_class_req[i].str_key)
+        if len(work_key) > 0:
+            if work_key[:1] == 'a' :
+                work_value = work_class_req[i].str_value
+                str_json_data = str_json_data + work_class_req[i].str_key \
+                                    + ':' + func_strip_dquot(work_value) \
+                                    + ',\n\t'
+            else :
+                work_value = func_check_json_dquat(work_class_req[i].str_value)
+                str_json_data = str_json_data + func_check_json_dquat(work_class_req[i].str_key) \
+                                    + ':' + work_value \
+                                    + ',\n\t'
+    str_json_data = str_json_data[:-3] + '\n}'
+    return str_json_data
+
 
 # 機能： API問合せ文字列を作成し返す。
 # 戻り値： api問合せのurl文字列
@@ -288,18 +317,6 @@ def func_api_req(str_url):
     json_req = json.loads(str_shiftjis)
 
     return json_req
-
-
-# 機能: class_req型データをjson形式の文字列に変換する。
-# 返値: json形式の文字
-# 第１引数： class_req型データ
-def func_make_json_format(work_class_req):
-    str_json_data =  '{\n\t'
-    for i in range(len(work_class_req)) :
-        if len(work_class_req[i].str_key) > 0:
-            str_json_data = str_json_data + work_class_req[i].str_key + ':' + work_class_req[i].str_value + ',\n\t'
-    str_json_data = str_json_data[:-3] + '\n}'
-    return str_json_data
 
 
 # 機能： アカウント情報をファイルから取得する
@@ -761,6 +778,7 @@ if __name__ == "__main__":
         print('金利:\t', dic_return.get('sKinri'))
         print('注文日時:\t', dic_return.get('sOrderDate'))
         print()
+        
         print()    
         print('p_errno', dic_return.get('p_errno'))
         print('p_err', dic_return.get('p_err'))
